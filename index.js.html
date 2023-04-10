@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Canvas Multiple lines like textarea</title>
+</head>
+
+<body>
+<div style=" padding-bottom: 5px;">
+    FontSize: <input id="fontSize" type="number" value="16" />
+    MaxWidth: <input id="maxWidth" type="number" value="200" />
+    FontName:
+    <select id="fontName" value="Arial">
+        <option>Arial</option>
+        <option>Roboto</option>
+        <option>monospace</option>
+        <option>fantasy</option>
+    </select>
+    TextAlign:
+    <select id="textAlign" value="left">
+        <option>left</option>
+        <option>center</option>
+        <option>right</option>
+    </select>
+</div>
+<div style="margin-top: 10px;">
+    <canvas id="canvas" width="200" height="400"></canvas>
+    <textarea id="myText" style="width: 200px; height: 400px; font-size: 16px; font-family: 'Arial',serif; ">Hello world</textarea>
+</div>
+<script>
+    const getTextWidth = (ctx, text) => ctx.measureText(text).width;
+
+    const splitWordToLinesByWidth = (word, maxWidth) => {
+        const lines = [];
+        let currentLine = "";
+        let currentLineWidth = 0;
+        for (let i = 0; i < word.length; i++) {
+            const c = word[i];
+            const cWidth = getTextWidth(ctx, c);
+            if (currentLineWidth + cWidth > maxWidth) {
+                lines.push(currentLine);
+                currentLine = "";
+                currentLineWidth = 0;
+            }
+            currentLine += c;
+            currentLineWidth += cWidth;
+        }
+        lines.push(currentLine);
+        return lines;
+    };
+
+    function wrapText(text, maxWidth, fontSize) {
+        ctx.font = `${fontSize}px ${fontName}`;
+        const lines = [];
+        text.split("\n").forEach((line) => {
+            let currentLine = "";
+            let currentLineWidth = 0;
+            const words = line.split(" ");
+            for (let i = 0; i < words.length; i++) {
+                const word = words[i];
+                let wordWidth = getTextWidth(ctx, word);
+                if (wordWidth > maxWidth) {
+                    if (currentLine !== "") {
+                        lines.push(currentLine);
+                    }
+                    let tmp = splitWordToLinesByWidth(word, maxWidth);
+                    for (let z = 0; z < tmp.length - 1; z++) {
+                        lines.push(tmp[z]);
+                    }
+                    currentLine = tmp[tmp.length - 1];
+                    currentLineWidth = getTextWidth(ctx, currentLine);
+                    continue;
+                }
+                let spaceWidth = currentLineWidth === 0 ? 0 : getTextWidth(ctx, " ");
+                if (currentLineWidth + spaceWidth + wordWidth > maxWidth) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                    currentLineWidth = wordWidth;
+                    continue;
+                }
+                if (currentLine !== "") {
+                    currentLine += " ";
+                    currentLineWidth += getTextWidth(ctx, " ");
+                }
+                currentLine += word;
+                currentLineWidth += wordWidth;
+            }
+
+            lines.push(currentLine);
+        });
+        return lines;
+    }
+
+
+
+    const canvas = document.getElementById("canvas");
+    const textarea = document.getElementById("myText");
+    const ctx = canvas.getContext("2d");
+
+    let fontSize = 16;
+    let textAreaValue = "Hello world";
+    let fontName = "Arial";
+    let maxWidth = 200;
+    let textAlign = 'left';
+
+    const getTextStartX = () => {
+        if(textAlign === 'left') {
+            return 0;
+        } else {
+            if(textAlign === 'right') {
+                return maxWidth;
+            } else {
+                return  maxWidth / 2;
+            }
+        }
+    }
+
+    const drawText = (text) => {
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, 1000, 1000);
+        ctx.fillStyle = "black";
+        ctx.textBaseline = "top";
+
+        const textStartX = getTextStartX(textAlign);
+
+        const lines = wrapText(text, maxWidth, fontSize);
+        for (let i = 0; i < lines.length; i++) {
+            ctx.fillText(lines[i], textStartX, (i * fontSize));
+        }
+    };
+
+    textarea.oninput = (event) => {
+        textAreaValue = event.target.value;
+        drawText(textAreaValue);
+    };
+
+    //settings part
+    const fontSizeInput = document.getElementById("fontSize");
+    fontSizeInput.addEventListener("input", (event) => {
+        fontSize = event.target.value;
+        textarea.style.fontSize = `${fontSize}px`;
+        drawText(textAreaValue);
+    });
+
+    const fontNameSelect = document.getElementById("fontName");
+    fontNameSelect.addEventListener("change", (event) => {
+        fontName = event.target.value;
+        textarea.style.fontFamily = fontName;
+        drawText(textAreaValue);
+    });
+
+    const maxWidthInput = document.getElementById("maxWidth");
+    maxWidthInput.addEventListener("input", (event) => {
+        maxWidth = event.target.value;
+        textarea.style.width = `${maxWidth}px`;
+        canvas.width =`${maxWidth}`;
+        drawText(textAreaValue);
+    });
+
+    const textAlignSelect = document.getElementById("textAlign");
+    textAlignSelect.addEventListener("change", (event) => {
+        textAlign = event.target.value;
+        textarea.style.textAlign = textAlign;
+        ctx.textAlign = textAlign;
+        drawText(textAreaValue);
+    });
+
+
+    drawText(textAreaValue);
+
+</script>
+
+</body>
+
+</html>
+
