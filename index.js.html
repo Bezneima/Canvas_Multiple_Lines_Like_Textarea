@@ -7,8 +7,8 @@
 
 <body>
 <div style=" padding-bottom: 5px;">
-    FontSize: <input id="fontSize" type="number" value="16" />
-    MaxWidth: <input id="maxWidth" type="number" value="200" />
+    FontSize: <input id="fontSize" type="number" value="16"/>
+    MaxWidth: <input id="maxWidth" type="number" value="200"/>
     FontName:
     <select id="fontName" value="Arial">
         <option>Arial</option>
@@ -25,7 +25,8 @@
 </div>
 <div style="margin-top: 10px;">
     <canvas id="canvas" width="200" height="400"></canvas>
-    <textarea id="myText" style="width: 200px; height: 400px; font-size: 16px; font-family: 'Arial',serif; ">Hello world</textarea>
+    <textarea id="myText"
+              style="width: 200px; height: 400px; font-size: 16px; font-family: 'Arial',serif; ">Hello world</textarea>
 </div>
 <script>
     const getTextWidth = (ctx, text) => ctx.measureText(text).width;
@@ -92,7 +93,6 @@
     }
 
 
-
     const canvas = document.getElementById("canvas");
     const textarea = document.getElementById("myText");
     const ctx = canvas.getContext("2d");
@@ -104,13 +104,13 @@
     let textAlign = 'left';
 
     const getTextStartX = () => {
-        if(textAlign === 'left') {
+        if (textAlign === 'left') {
             return 0;
         } else {
-            if(textAlign === 'right') {
+            if (textAlign === 'right') {
                 return maxWidth;
             } else {
-                return  maxWidth / 2;
+                return maxWidth / 2;
             }
         }
     }
@@ -120,9 +120,9 @@
         ctx.fillRect(0, 0, 1000, 1000);
         ctx.fillStyle = "black";
         ctx.textBaseline = "top";
+        ctx.textAlign = textAlign;
 
-        const textStartX = getTextStartX(textAlign);
-
+        const textStartX = Number(getTextStartX(textAlign));
         const lines = wrapText(text, maxWidth, fontSize);
         for (let i = 0; i < lines.length; i++) {
             ctx.fillText(lines[i], textStartX, (i * fontSize));
@@ -153,7 +153,7 @@
     maxWidthInput.addEventListener("input", (event) => {
         maxWidth = event.target.value;
         textarea.style.width = `${maxWidth}px`;
-        canvas.width =`${maxWidth}`;
+        canvas.width = maxWidth;
         drawText(textAreaValue);
     });
 
